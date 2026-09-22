@@ -1,0 +1,8 @@
+{
+  "name": "khatm-quran",
+  "private": true,
+  "scripts": {
+    "verify-quran": "node scripts/verify-quran.js",
+    "build": "npm run verify-quran"
+  }
+}
