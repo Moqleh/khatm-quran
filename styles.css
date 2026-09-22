@@ -139,3 +139,15 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
 
 /* v45 — global animated PWA install affordance */
 .global-install-pulse{position:fixed;z-index:30;left:max(18px,env(safe-area-inset-left));bottom:calc(92px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;border:1.5px solid var(--app-gold);background:#0a3c33;color:var(--app-gold);display:grid;place-items:center;box-shadow:0 10px 28px rgba(0,0,0,.25);cursor:pointer}.global-install-pulse span{font-size:28px;line-height:1;animation:installArrow 1.35s ease-in-out infinite}.global-install-pulse:before{content:"";position:absolute;inset:-7px;border:1px solid rgba(221,182,90,.55);border-radius:50%;animation:installRing 1.8s ease-out infinite}.global-install-pulse.install-ready{background:var(--app-gold);color:#173b32}.global-install-pulse.installed{display:none}@keyframes installArrow{0%,100%{transform:translateY(-3px)}50%{transform:translateY(4px)}}@keyframes installRing{0%{transform:scale(.86);opacity:.75}100%{transform:scale(1.22);opacity:0}}@media(prefers-reduced-motion:reduce){.global-install-pulse span,.global-install-pulse:before{animation:none}}@media(max-width:600px){.global-install-pulse{width:54px;height:54px;bottom:calc(88px + env(safe-area-inset-bottom));left:14px}}
+
+/* v46 — identical calendar conversion layouts */
+.calendar-convert{min-height:146px!important;align-content:start!important}
+.calendar-convert>label,.hijri-fields{margin:0!important}
+.calendar-convert>label{display:block!important}
+.calendar-convert>label>span,.hijri-fields label span{height:18px!important;line-height:18px!important;margin:0 5px 7px!important}
+.calendar-convert input,.calendar-convert select{height:52px!important;border-radius:15px!important}
+.hijri-fields{display:grid!important;grid-template-columns:1fr 2fr 1.35fr!important;gap:10px!important;align-items:end!important}
+.hijri-fields label{min-width:0!important}
+.hijri-fields select{width:100%!important}
+.calendar-convert .primary{margin-top:0!important}
+@media(max-width:520px){.hijri-fields{grid-template-columns:1fr 1.7fr 1.25fr!important}.hijri-fields label:last-child{grid-column:auto!important}.calendar-convert input,.calendar-convert select{font-size:16px!important}}
