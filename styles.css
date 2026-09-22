@@ -199,3 +199,6 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
 .qibla-arrow>span{position:absolute;left:50%;top:50%;width:8px;height:88px;transform:translate(-50%,-100%);transform-origin:50% 100%;border-radius:8px;background:var(--app-gold);filter:drop-shadow(0 3px 4px rgba(0,0,0,.3))}
 .qibla-arrow>span:before{content:"";position:absolute;left:50%;top:-1px;transform:translate(-50%,-55%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-bottom:22px solid var(--app-gold)}
 .kaaba-mark{z-index:6!important}
+
+/* v60 explicit language selector */
+.lang-switch{display:flex;align-items:center;gap:4px;padding:4px;border:1px solid rgba(236,188,71,.32);border-radius:14px;background:rgba(255,255,255,.035);direction:ltr}.lang-choice{border:0;background:transparent;color:var(--cream,#f7f0df);font:inherit;font-size:.78rem;font-weight:700;padding:7px 10px;border-radius:10px;cursor:pointer;white-space:nowrap}.lang-choice.active{background:var(--gold,#e8b84b);color:#0b4035}.lang-choice:focus-visible{outline:2px solid var(--gold,#e8b84b);outline-offset:2px}@media(max-width:520px){.lang-switch{gap:2px;padding:3px}.lang-choice{font-size:.7rem;padding:6px 7px}}
