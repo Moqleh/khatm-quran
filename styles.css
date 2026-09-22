@@ -39,3 +39,6 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
 #statsPage h1,#settingsPage h1,#aboutPage h1{color:var(--app-gold)!important;text-align:center;font-size:42px}
 .quran-text{border-radius:24px!important}.reader-nav{position:sticky;bottom:94px;z-index:4;background:var(--app-bg);padding:8px 0}
 @media(max-width:700px){header{padding-inline:24px!important}.page{padding-inline:29px!important}.top-actions button{border-radius:18px!important}.card{padding:25px!important}#home .hero{margin-top:10px}.bottom-nav{grid-template-columns:repeat(5,1fr)!important}.bottom-nav button{font-size:12px!important}.bottom-nav button span:first-child{font-size:22px!important}}
+
+/* v9 official uploaded logo */
+.logo-image{width:58px!important;height:58px!important;padding:0!important;overflow:hidden;border-radius:50%!important;border:1px solid rgba(221,182,90,.55)!important;background:#00372d!important;box-shadow:0 5px 18px rgba(0,0,0,.18)}.logo-image img{width:100%;height:100%;object-fit:cover;display:block}.brand{gap:12px}.brand b{font-size:20px}@media(max-width:700px){.logo-image{width:54px!important;height:54px!important}.brand small{font-size:10px}}
