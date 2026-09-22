@@ -150,3 +150,8 @@ const prayerPlaces={
 };
 function fillPrayerCities(country,selected=''){const city=$('#ptCity');city.innerHTML='<option value="">اختر المدينة</option>'+((prayerPlaces[country]||[]).map(x=>'<option value="'+x+'">'+x+'</option>').join(''));city.disabled=!country;if(selected&&[...city.options].some(o=>o.value===selected))city.value=selected}
 if($('#ptCountry')){const country=$('#ptCountry');country.innerHTML='<option value="">اختر الدولة</option>'+Object.keys(prayerPlaces).map(x=>'<option value="'+x+'">'+x+'</option>').join('');country.onchange=()=>fillPrayerCities(country.value);try{const p=JSON.parse(localStorage.getItem('khatm-prayer-city')||'null');if(p&&prayerPlaces[p.country]){country.value=p.country;fillPrayerCities(p.country,p.city);$('#ptMethod').value=p.method||'4'}}catch(e){}}
+
+
+// v41 — Qibla uses the same controlled country/city lists as prayer times.
+function fillQiblaCities(country,selected=''){const city=$('#qiblaCity');if(!city)return;city.innerHTML='<option value="">اختر المدينة</option>'+((prayerPlaces[country]||[]).map(x=>'<option value="'+x+'">'+x+'</option>').join(''));city.disabled=!country;if(selected&&[...city.options].some(o=>o.value===selected))city.value=selected}
+if($('#qiblaCountry')){const country=$('#qiblaCountry');country.innerHTML='<option value="">اختر الدولة</option>'+Object.keys(prayerPlaces).map(x=>'<option value="'+x+'">'+x+'</option>').join('');country.onchange=()=>fillQiblaCities(country.value);}
