@@ -89,7 +89,7 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
   #quran .reader-choice{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)!important;gap:10px!important}
   #quran .reader-choice .iconbtn{grid-column:1/-1!important}
   #quran .mushaf-viewport{width:100%!important;max-width:none!important;height:72vh!important}
-  #quran .mushaf-viewport img{width:100%!important;max-width:none!important}
+  #quran .mushaf-viewport img{max-width:none!important}
   #quran .reader-nav{width:100%!important;grid-template-columns:1fr 1.35fr 1fr!important}
 }
 
@@ -287,3 +287,7 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
     z-index:90!important;
   }
 }
+
+
+/* v73 — reader zoom must be controlled by JS; do not override the inline zoom width. */
+#quran .mushaf-viewport img{max-width:none!important}
