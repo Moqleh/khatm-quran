@@ -551,3 +551,44 @@ loadPrayerCoords=async function(lat,lon,label){
 showCachedPrayers=function(note){try{const c=JSON.parse(localStorage.getItem('khatm-last-prayers')||'null');if(c?.t){renderPrayerDashboardV51(c.t,c.location||c.label,c.dateData,c.timeZone);return}}catch(e){}$('#ptLocationTitle').textContent=note||p75().last};
 rerenderPrayer76=function(){try{const c=lastPrayerSchedule?.t?lastPrayerSchedule:JSON.parse(localStorage.getItem('khatm-last-prayers')||'null');if(c?.t)renderPrayerDashboardV51(c.t,c.location||c.label,c.dateData,c.timeZone)}catch(e){console.error('prayer language rerender',e)}};
 window.addEventListener('DOMContentLoaded',()=>{migrateLocationStorage79();setTimeout(rerenderPrayer76,0)});
+
+
+// v80 — canonical prayer renderer. It does not call any legacy renderer/wrapper.
+// The DOM language is the source of truth because it is what the user is actually seeing.
+function uiLang80(){const x=document.documentElement.lang;return ['ar','en','ur'].includes(x)?x:(['ar','en','ur'].includes(state.lang)?state.lang:'ar')}
+const P80={
+ ar:{current:'موقعك الحالي',saved:'الموقع المحفوظ',next:'متبقي حتى',badge:'التالي',tomorrow:'غدًا',names:{Fajr:'الفجر',Sunrise:'الشروق',Dhuhr:'الظهر',Asr:'العصر',Maghrib:'المغرب',Isha:'العشاء'}},
+ en:{current:'Your current location',saved:'Saved location',next:'Time until',badge:'Next',tomorrow:'Tomorrow',names:{Fajr:'Fajr',Sunrise:'Sunrise',Dhuhr:'Dhuhr',Asr:'Asr',Maghrib:'Maghrib',Isha:'Isha'}},
+ ur:{current:'آپ کا موجودہ مقام',saved:'محفوظ مقام',next:'وقت باقی',badge:'اگلی',tomorrow:'کل',names:{Fajr:'فجر',Sunrise:'طلوع آفتاب',Dhuhr:'ظہر',Asr:'عصر',Maghrib:'مغرب',Isha:'عشاء'}}
+};
+function displayLocation80(input,lang=uiLang80()){
+ const m=locationModel79(input),P=P80[lang];
+ if(m.kind==='current')return P.current;if(m.kind==='saved')return P.saved;
+ if(m.kind==='city'){
+  if(lang==='en')return (PLACE_EN[m.city]||m.city)+', '+(PLACE_EN[m.country]||m.country);
+  return m.city+(lang==='ar'?'، ':', ')+m.country;
+ }
+ if(lang==='en')return PLACE_EN[m.value]||m.value;return m.value;
+}
+function date80(d,lang=uiLang80()){
+ if(!d)return'';const h=d.hijri,g=d.gregorian,n=Number(h?.month?.number||0);
+ let hm='';if(h){hm=lang==='ar'?(h.month?.ar||''):lang==='en'?(HIJRI_EN77[n-1]||h.month?.en||''):(HM72.ur[n-1]||h.month?.en||'')}
+ const hs=h?(h.day+' '+hm+' '+h.year+(lang==='ar'?' هـ':lang==='en'?' AH':' ہجری')):'';
+ const gm=g?(g.day+' '+(lang==='ar'?(g.month?.ar||g.month?.en||''):(g.month?.en||''))+' '+g.year):'';
+ return hs+(gm?' • '+gm:'');
+}
+renderPrayerDashboardV51=function(t,location,dateData,timeZone){
+ const lang=uiLang80(),P=P80[lang],model=locationModel79(location),keys=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+ const zone=minutesInZone(timeZone),now=new Date(),mins=zone??(now.getHours()*60+now.getMinutes()),salat=keys.filter(k=>k!=='Sunrise');
+ let next=salat.find(k=>{const z=cleanPrayerTime(t[k]);if(z==='—')return false;const [hh,mm]=z.split(':').map(Number);return hh*60+mm>mins}),tomorrow=false;
+ if(!next){next='Fajr';tomorrow=true}
+ const nextTime=cleanPrayerTime(t[next]);
+ $('#ptLocationTitle').textContent=displayLocation80(model,lang);
+ $('#ptDate').textContent=date80(dateData,lang);
+ $('#ptGrid').innerHTML=keys.map(k=>'<div class="prayer-row '+(k===next?'is-next':'')+'"><span class="prayer-row-icon">'+prayerIcon(k)+'</span><b>'+P.names[k]+'</b>'+(k===next?'<em>'+P.badge+'</em>':'')+'<strong>'+cleanPrayerTime(t[k])+'</strong></div>').join('');
+ $('#ptNext').innerHTML='<span>'+P.next+' '+P.names[next]+'</span><b id="ptCountdown">--:--:--</b><small>'+nextTime+(tomorrow?' • '+P.tomorrow:'')+'</small>';
+ lastPrayerSchedule={t,location:model,dateData,timeZone};
+ try{localStorage.setItem('khatm-last-prayers',JSON.stringify(lastPrayerSchedule))}catch(e){}
+ startPrayerCountdownV51(nextTime,tomorrow,timeZone);
+};
+rerenderPrayer76=function(){try{const c=lastPrayerSchedule?.t?lastPrayerSchedule:JSON.parse(localStorage.getItem('khatm-last-prayers')||'null');if(c?.t)renderPrayerDashboardV51(c.t,c.location||c.label,c.dateData,c.timeZone)}catch(e){console.error('prayer rerender',e)}};
