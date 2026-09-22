@@ -592,3 +592,44 @@ renderPrayerDashboardV51=function(t,location,dateData,timeZone){
  startPrayerCountdownV51(nextTime,tomorrow,timeZone);
 };
 rerenderPrayer76=function(){try{const c=lastPrayerSchedule?.t?lastPrayerSchedule:JSON.parse(localStorage.getItem('khatm-last-prayers')||'null');if(c?.t)renderPrayerDashboardV51(c.t,c.location||c.label,c.dateData,c.timeZone)}catch(e){console.error('prayer rerender',e)}};
+
+
+// Prayer module — single owner for Prayer dashboard DOM and locale-neutral cache.
+(function(){
+  const getLocale=()=>{const l=state?.lang;return ['ar','en','ur'].includes(l)?l:'ar'};
+  const CACHE_KEY='khatm-last-prayers',SCHEMA=2,KEYS=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+  const DICT={
+    ar:{current:'موقعك الحالي',saved:'الموقع المحفوظ',loading:'جاري تحميل المواقيت…',choose:'اختر الدولة والمدينة أولًا',fail:'تعذر تحميل المواقيت الآن.',next:'متبقي حتى',badge:'التالي',tomorrow:'غدًا',names:{Fajr:'الفجر',Sunrise:'الشروق',Dhuhr:'الظهر',Asr:'العصر',Maghrib:'المغرب',Isha:'العشاء'}},
+    en:{current:'Your current location',saved:'Saved location',loading:'Loading prayer times…',choose:'Choose a country and city first',fail:'Prayer times could not be loaded.',next:'Time until',badge:'Next',tomorrow:'Tomorrow',names:{Fajr:'Fajr',Sunrise:'Sunrise',Dhuhr:'Dhuhr',Asr:'Asr',Maghrib:'Maghrib',Isha:'Isha'}},
+    ur:{current:'آپ کا موجودہ مقام',saved:'محفوظ مقام',loading:'نماز کے اوقات لوڈ ہو رہے ہیں…',choose:'پہلے ملک اور شہر منتخب کریں',fail:'نماز کے اوقات لوڈ نہیں ہو سکے۔',next:'وقت باقی',badge:'اگلی',tomorrow:'کل',names:{Fajr:'فجر',Sunrise:'طلوع آفتاب',Dhuhr:'ظہر',Asr:'عصر',Maghrib:'مغرب',Isha:'عشاء'}}
+  };
+  const HM={ar:['محرم','صفر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوال','ذو القعدة','ذو الحجة'],en:['Muharram','Safar','Rabi al-Awwal','Rabi al-Thani','Jumada al-Awwal','Jumada al-Thani','Rajab','Shaban','Ramadan','Shawwal','Dhul Qadah','Dhul Hijjah'],ur:['محرم','صفر','ربیع الاول','ربیع الثانی','جمادی الاول','جمادی الثانی','رجب','شعبان','رمضان','شوال','ذوالقعدہ','ذوالحجہ']};
+  let ps={schemaVersion:SCHEMA,status:'idle',fetchedAt:0,timeZone:null,location:{kind:'current'},timings:null,dateData:null,error:null},controller=null,token=0,countdown=null;
+  const modelLocation=input=>{if(input&&typeof input==='object'&&input.kind)return input;if(!input||['__CURRENT_LOCATION__','موقعك الحالي','Your current location','آپ کا موجودہ مقام'].includes(input))return {kind:'current'};if(['الموقع المحفوظ','Saved location','محفوظ مقام'].includes(input))return {kind:'saved'};const a=String(input).split(/\s*[،,]\s*/);return a.length>1?{kind:'city',city:a[0],country:a.slice(1).join(', ')}:{kind:'text',value:String(input)}};
+  const place=(s,l)=>l==='en'?((typeof PLACE_EN!=='undefined'&&PLACE_EN[s])||s):s;
+  const locationText=(loc,l)=>{const D=DICT[l],m=modelLocation(loc);if(m.kind==='current')return D.current;if(m.kind==='saved')return D.saved;if(m.kind==='city')return place(m.city,l)+(l==='ar'?'، ':', ')+place(m.country,l);return place(m.value||'',l)};
+  const cleanTime=v=>{const m=String(v||'').match(/\d{1,2}:\d{2}/);return m?m[0]:'—'};
+  const dateText=(d,l)=>{if(!d)return '';const h=d.hijri,g=d.gregorian,n=Number(h?.month?.number||h?.month||0),hm=h?(HM[l][n-1]||(l==='ar'?h.month?.ar:h.month?.en)||''):'';const hs=h?(h.day+' '+hm+' '+h.year+(l==='ar'?' هـ':l==='en'?' AH':' ہجری')):'';const gm=g?(l==='ar'?(g.month?.ar||g.month?.en||''):(g.month?.en||'')):'';const gs=g?(g.day+' '+gm+' '+g.year):'';return hs+(gs?' • '+gs:'')};
+  const nextInfo=()=>{if(!ps.timings)return null;const now=new Date(),mins=minutesInZone(ps.timeZone)??(now.getHours()*60+now.getMinutes()),salat=KEYS.filter(k=>k!=='Sunrise');let key=salat.find(k=>{const z=cleanTime(ps.timings[k]);if(z==='—')return false;const a=z.split(':').map(Number);return a[0]*60+a[1]>mins}),tomorrow=false;if(!key){key='Fajr';tomorrow=true}return {key,tomorrow,value:cleanTime(ps.timings[key])}};
+  const stopCountdown=()=>{if(countdown){clearInterval(countdown);countdown=null}};
+  const startCountdown=info=>{stopCountdown();if(!info)return;const tick=()=>{const el=document.getElementById('ptCountdown');if(!el){stopCountdown();return}const zm=minutesInZone(ps.timeZone);if(zm==null){el.textContent='--:--:--';return}const a=info.value.split(':').map(Number);let sec=((a[0]*60+a[1]-zm)+(info.tomorrow?1440:0))*60-new Date().getSeconds();if(sec<0)sec+=86400;el.textContent=[Math.floor(sec/3600),Math.floor(sec%3600/60),sec%60].map(v=>String(v).padStart(2,'0')).join(':')};tick();countdown=setInterval(tick,1000)};
+  const persist=()=>{if(!ps.timings)return;try{localStorage.setItem(CACHE_KEY,JSON.stringify({schemaVersion:SCHEMA,fetchedAt:ps.fetchedAt,timeZone:ps.timeZone,location:ps.location,timings:ps.timings,dateData:ps.dateData}))}catch(e){}};
+  const migrate=d=>{if(!d)return null;const timings=d.timings||d.t;if(!timings)return null;return {schemaVersion:SCHEMA,fetchedAt:Number(d.fetchedAt)||Date.now(),timeZone:d.timeZone||null,location:modelLocation(d.location||d.label),timings,dateData:d.dateData||null}};
+  const loadCache=()=>{try{const d=migrate(JSON.parse(localStorage.getItem(CACHE_KEY)||'null'));if(!d)return false;ps={...ps,...d,status:'ready',error:null};persist();return true}catch(e){return false}};
+  const render=()=>{if(!ps.timings)return;const l=getLocale(),D=DICT[l],info=nextInfo(),loc=document.getElementById('ptLocationTitle'),date=document.getElementById('ptDate'),grid=document.getElementById('ptGrid'),next=document.getElementById('ptNext');if(loc)loc.textContent=locationText(ps.location,l);if(date)date.textContent=dateText(ps.dateData,l);if(grid)grid.innerHTML=KEYS.map(k=>'<div class="prayer-row '+(info?.key===k?'is-next':'')+'"><span class="prayer-row-icon">'+prayerIcon(k)+'</span><b>'+D.names[k]+'</b>'+(info?.key===k?'<em>'+D.badge+'</em>':'')+'<strong>'+cleanTime(ps.timings[k])+'</strong></div>').join('');if(next&&info)next.innerHTML='<span>'+D.next+' '+D.names[info.key]+'</span><b id="ptCountdown">--:--:--</b><small>'+info.value+(info.tomorrow?' • '+D.tomorrow:'')+'</small>';startCountdown(info)};
+  const setStatus=k=>{const el=document.getElementById('ptLocationTitle');if(el)el.textContent=DICT[getLocale()][k]||k};
+  const ingest=(timings,location,dateData,timeZone)=>{ps={...ps,status:'ready',fetchedAt:Date.now(),timeZone:timeZone||null,location:modelLocation(location),timings,dateData:dateData||null,error:null};persist();render()};
+  const fetchJson=async url=>{const my=++token;if(controller)controller.abort();controller=new AbortController();try{const r=await fetch(url,{signal:controller.signal}),j=await r.json();if(my!==token)return null;if(!r.ok||!j.data)throw new Error('Prayer API');return j.data}catch(e){if(e?.name==='AbortError'||my!==token)return null;throw e}};
+  const refreshCoords=async(lat,lon,location={kind:'current'})=>{setStatus('loading');const method=document.getElementById('ptMethod')?.value||4;try{const d=await fetchJson('https://api.aladhan.com/v1/timings/'+Math.floor(Date.now()/1000)+'?latitude='+encodeURIComponent(lat)+'&longitude='+encodeURIComponent(lon)+'&method='+encodeURIComponent(method));if(d)ingest(d.timings,location,d.date,d.meta?.timezone)}catch(e){if(loadCache())render();else setStatus('fail')}};
+  const refreshCity=async()=>{const city=document.getElementById('ptCity')?.value?.trim(),country=document.getElementById('ptCountry')?.value?.trim(),method=document.getElementById('ptMethod')?.value||4;if(!city||!country){setStatus('choose');return}setStatus('loading');try{const d=await fetchJson('https://api.aladhan.com/v1/timingsByCity?city='+encodeURIComponent(city)+'&country='+encodeURIComponent(country)+'&method='+encodeURIComponent(method));if(d){ingest(d.timings,{kind:'city',city,country},d.date,d.meta?.timezone);localStorage.setItem('khatm-prayer-city',JSON.stringify({city,country,method}))}}catch(e){if(loadCache())render();else setStatus('fail')}};
+  const init=()=>{loadCache();render();try{runtimeObserver74.disconnect()}catch(e){}};
+  window.PrayerPage={init,rerender:render,refresh:refreshCoords,refreshCity,ingest,getState:()=>({...ps})};
+  renderPrayerDashboardV51=(t,location,dateData,timeZone)=>ingest(t,location,dateData,timeZone);
+  rerenderPrayer76=()=>render();
+  loadPrayerCoords=(lat,lon,label)=>refreshCoords(lat,lon,label);
+  loadCityPrayers=refreshCity;
+  showCachedPrayers=()=>{if(loadCache())render();else setStatus('fail')};
+  useSharedLocationAcrossPages=function(lat,lon,label){const m=modelLocation(label);saveSharedLocation(lat,lon,m);try{setQibla(lat,lon,locationText(m,getLocale()))}catch(e){}refreshCoords(lat,lon,m)};
+  const rebind=()=>{const b=document.getElementById('ptLoadBtn');if(b)b.onclick=refreshCity};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{init();rebind()});else{init();rebind()}
+})();
