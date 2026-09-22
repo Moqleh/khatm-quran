@@ -352,3 +352,22 @@ const LEGACY72={
 function translateLegacy72(v){if(state.lang==='ar'||typeof v!=='string')return v;const p=LEGACY72[v];return p?p[state.lang==='en'?0:1]:v}
 const _setText72=Object.getOwnPropertyDescriptor(Node.prototype,'textContent');
 if(_setText72&&_setText72.set&&!window.__KHATM_TEXT_GUARD_72__){Object.defineProperty(Node.prototype,'textContent',{configurable:true,enumerable:_setText72.enumerable,get:_setText72.get,set:function(v){return _setText72.set.call(this,translateLegacy72(v))}});window.__KHATM_TEXT_GUARD_72__=true}
+
+
+// v73 — resilient Mushaf zoom controls (buttons + pinch), independent of legacy onclick bindings.
+function setMushafZoom73(next){
+ const img=document.getElementById('mushafPageImage'),label=document.getElementById('zoomLabel'),vp=document.getElementById('mushafViewport');
+ if(!img||!label||!vp)return;
+ mushafScale=Math.max(1,Math.min(5,Number(next)||1));
+ img.style.setProperty('width',(mushafScale*100)+'%','important');
+ img.style.setProperty('max-width','none','important');
+ label.textContent=Math.round(mushafScale*100)+'%';
+}
+applyZoom=function(){setMushafZoom73(mushafScale)};
+resetZoom=function(){setMushafZoom73(1);const v=document.getElementById('mushafViewport');if(v){v.scrollTop=0;v.scrollLeft=0}};
+document.addEventListener('click',function(e){
+ const b=e.target.closest('#zoomIn,#zoomOut,#zoomReset');if(!b)return;e.preventDefault();e.stopPropagation();
+ if(b.id==='zoomIn')setMushafZoom73(mushafScale+.25);
+ else if(b.id==='zoomOut')setMushafZoom73(mushafScale-.25);
+ else resetZoom();
+},true);
