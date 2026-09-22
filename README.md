@@ -4,29 +4,20 @@
 
 > صدقة جارية عن محمد العقلة وعائلته.
 
-## مبادئ الإصدار
-- القرآن والختمة أولًا.
+## القارئ الحالي
+- يعرض 604 صورة صفحة من تطبيق اختم قرآنك الأصلي: `assets/mushaf_pages/p001.jpg` حتى `p604.jpg`.
+- تم التحقق بنيويًا من وجود جميع الملفات وتسلسل أسمائها، دون صفحات مفقودة.
+- الصور تُعرض كما هي دون تحويل نصي أو تعديل للمحتوى.
+- هذا الفحص البنيوي لا يساوي مطابقة مستقلة لمحتوى الصفحات مع نسخة مرجعية معتمدة؛ تلك خطوة تحقق منفصلة مطلوبة.
+- فهرس `quran-pages.json` يستخدم للانتقال بين السور والصفحات.
+
+## التقدم والخصوصية
 - لا حساب مطلوب للاستخدام الأساسي.
-- التقدم والإعدادات محلية مع تصدير/استيراد JSON.
-- لا يعرض نص قرآني بديل عند فشل التحقق.
-- لا تستخدم مواضع تقريبية للسور أو الأجزاء أو الصفحات.
-- واجهة عربية/إنجليزية وPWA.
+- التقدم والإعدادات والعلامات تحفظ محليًا.
+- تصدير/استيراد JSON يشمل حالة الختمة وعلامات الصفحات.
+- الموقع الجغرافي يطلب فقط عند اختيار خدمات الصلاة/القبلة ولا يدخل في ملف الختمة.
 
-## بوابة سلامة القرآن
-التطبيق مهيأ لاستخدام ملف محلي فقط: `assets/data/quran-uthmani.txt`.
-يجب أن تكون النسخة مثبتة حرفيًا من المصدر المعتمد، ثم ينجح:
-
-```bash
-npm run verify-quran
-```
-
-الفحص الحالي يرفض البناء عند غياب الملف، أو اختلاف 6236 آية / 114 سورة / 604 بداية صفحة، أو فساد تسلسل بيانات الصفحات. كما يحسب SHA-256. لا تعتبر البصمة مرجعية حتى تتم مطابقتها مستقلًا مع artifact رسمي موثق.
-
-## المصادر
-- Quran text target: Tanzil Quran Text, Uthmani v1.1 — verbatim distribution only with attribution under Tanzil terms.
-- Prayer times: AlAdhan, requested only after user action.
-- Qibla: local mathematical bearing to the Kaaba coordinates.
-- Manual city fallback geocodes only after explicit user action.
-
-## النشر
-GitHub Actions يشغل `npm run verify-quran` على push وpull request. أي فشل يمنع اعتبار طبقة القرآن صالحة للنشر.
+## مصادر الخدمات
+- Prayer times: AlAdhan after explicit user action.
+- Qibla: local mathematical bearing to Kaaba coordinates.
+- Manual city lookup: Nominatim after explicit user action.
