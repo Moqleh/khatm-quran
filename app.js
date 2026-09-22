@@ -405,3 +405,29 @@ function localizeNode74(root){
 const runtimeObserver74=new MutationObserver(ms=>{if(state.lang==='ar')return;runtimeObserver74.disconnect();try{for(const m of ms){for(const n of m.addedNodes)localizeNode74(n);if(m.type==='characterData')localizeNode74(m.target.parentNode)}}finally{runtimeObserver74.observe(document.body,{subtree:true,childList:true,characterData:true})}});
 window.addEventListener('DOMContentLoaded',()=>{localizeNode74(document.body);runtimeObserver74.observe(document.body,{subtree:true,childList:true,characterData:true})});
 const _applyLanguage74=applyLanguageV63;applyLanguageV63=function(){_applyLanguage74();localizeNode74(document.body)};
+
+
+// v75 — prayer dashboard is rendered natively in the selected language.
+// Do not rely on post-render Arabic text replacement for structured prayer data.
+const PRAYER75={
+ ar:{Fajr:'الفجر',Sunrise:'الشروق',Dhuhr:'الظهر',Asr:'العصر',Maghrib:'المغرب',Isha:'العشاء',current:'موقعك الحالي',today:'مواقيت اليوم',next:'متبقي حتى',badge:'التالية',tomorrow:'غدًا',saved:'الموقع المحفوظ',last:'آخر بيانات محفوظة'},
+ en:{Fajr:'Fajr',Sunrise:'Sunrise',Dhuhr:'Dhuhr',Asr:'Asr',Maghrib:'Maghrib',Isha:'Isha',current:'Your current location',today:"Today's prayer times",next:'Time until',badge:'Next',tomorrow:'Tomorrow',saved:'Saved location',last:'Last saved data'},
+ ur:{Fajr:'فجر',Sunrise:'طلوع آفتاب',Dhuhr:'ظہر',Asr:'عصر',Maghrib:'مغرب',Isha:'عشاء',current:'آپ کا موجودہ مقام',today:'آج کے نماز کے اوقات',next:'وقت باقی',badge:'اگلی',tomorrow:'کل',saved:'محفوظ مقام',last:'آخری محفوظ ڈیٹا'}
+};
+function p75(){return PRAYER75[state.lang]||PRAYER75.ar}
+function prayerName75(k){return p75()[k]||k}
+function hijriDate75(h){if(!h)return'';let month;if(state.lang==='ar')month=h.month?.ar||'';else if(state.lang==='en')month=h.month?.en||'';else{const n=Number(h.month?.number||0);month=(HM72.ur[n-1]||h.month?.en||'')}return h.day+' '+month+' '+h.year+(state.lang==='ar'?' هـ':state.lang==='en'?' AH':' ہجری')}
+renderPrayerDashboardV51=function(t,label,dateData,timeZone){
+ const localMins=minutesInZone(timeZone),now=new Date(),mins=localMins??(now.getHours()*60+now.getMinutes()),keys=['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'],salat=keys.filter(k=>k!=='Sunrise');
+ let nextKey=salat.find(k=>{const z=cleanPrayerTime(t[k]);if(z==='—')return false;const [hh,mm]=z.split(':').map(Number);return hh*60+mm>mins}),tomorrow=false;if(!nextKey){nextKey='Fajr';tomorrow=true}
+ const nextTime=cleanPrayerTime(t[nextKey]),P=p75();
+ $('#ptLocationTitle').textContent=label?((state.lang==='en'&&PLACE_EN[label])?PLACE_EN[label]:label):P.today;
+ $('#ptGrid').innerHTML=keys.map(k=>'<div class="prayer-row '+(k===nextKey?'is-next':'')+'"><span class="prayer-row-icon">'+prayerIcon(k)+'</span><b>'+prayerName75(k)+'</b>'+(k===nextKey?'<em>'+P.badge+'</em>':'')+'<strong>'+cleanPrayerTime(t[k])+'</strong></div>').join('');
+ $('#ptNext').innerHTML='<span>'+P.next+' '+prayerName75(nextKey)+'</span><b id="ptCountdown">--:--:--</b><small>'+nextTime+(tomorrow?' • '+P.tomorrow:'')+'</small>';
+ const g=dateData?.gregorian;const greg=g?(g.day+' '+(state.lang==='ar'?(g.month?.ar||g.month?.en||''):(g.month?.en||''))+' '+g.year):'';
+ $('#ptDate').textContent=(dateData?.hijri?hijriDate75(dateData.hijri):'')+(greg?' • '+greg:'');
+ lastPrayerSchedule={t,label,dateData,timeZone};try{localStorage.setItem('khatm-last-prayers',JSON.stringify(lastPrayerSchedule))}catch(e){};startPrayerCountdownV51(nextTime,tomorrow,timeZone);
+};
+const _loadPrayerCoords75=loadPrayerCoords;
+loadPrayerCoords=async function(lat,lon,label){const method=$('#ptMethod').value,P=p75();$('#ptLocationTitle').textContent=UI72[state.lang]?.loadingPrayer||tr74('جاري تحميل المواقيت…');try{const r=await fetch('https://api.aladhan.com/v1/timings/'+Math.floor(Date.now()/1000)+'?latitude='+encodeURIComponent(lat)+'&longitude='+encodeURIComponent(lon)+'&method='+encodeURIComponent(method)),j=await r.json();if(!r.ok||!j.data)throw 0;renderPrayerDashboardV51(j.data.timings,label||P.current,j.data.date,j.data.meta?.timezone)}catch(e){showCachedPrayers(tr74('تعذر تحميل المواقيت من موقعك الآن.'))}};
+showCachedPrayers=function(note){try{const c=JSON.parse(localStorage.getItem('khatm-last-prayers')||'null');if(c?.t){renderPrayerDashboardV51(c.t,c.label,c.dateData,c.timeZone);$('#ptLocationTitle').textContent=(c.label||p75().saved)+' • '+p75().last;return}}catch(e){}$('#ptLocationTitle').textContent=tr74('تعذر تحميل المواقيت الآن.')};
