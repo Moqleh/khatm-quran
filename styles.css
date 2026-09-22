@@ -169,3 +169,8 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
 #home .ring span,.progress-circle b{display:block!important;font-size:34px!important;line-height:1!important;font-weight:900!important;color:var(--app-gold)!important}
 #home .ring small,.progress-circle span{display:block!important;margin-top:7px!important;font-size:12px!important;line-height:1.2!important;color:var(--app-cream)!important}
 @media(max-width:600px){#home .ring,.progress-circle{width:132px!important;height:132px!important;box-shadow:0 0 0 8px #155144!important}#home .ring span,.progress-circle b{font-size:32px!important}}
+
+/* v49 — clearer Qibla pointer */
+.qibla-arrow{font-size:0!important;width:0!important;height:0!important;border-left:15px solid transparent!important;border-right:15px solid transparent!important;border-bottom:64px solid var(--app-gold)!important;color:transparent!important;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35));left:50%!important;top:50%!important;margin-left:-15px!important;margin-top:-64px!important;transform-origin:15px 64px!important;z-index:5!important}
+.qibla-arrow:after{content:"";position:absolute;left:-5px;top:42px;width:10px;height:28px;border-radius:8px;background:var(--app-gold)}
+.kaaba-mark{z-index:6!important}
