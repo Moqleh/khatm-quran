@@ -202,3 +202,6 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
 
 /* v60 explicit language selector */
 .lang-switch{display:flex;align-items:center;gap:4px;padding:4px;border:1px solid rgba(236,188,71,.32);border-radius:14px;background:rgba(255,255,255,.035);direction:ltr}.lang-choice{border:0;background:transparent;color:var(--cream,#f7f0df);font:inherit;font-size:.78rem;font-weight:700;padding:7px 10px;border-radius:10px;cursor:pointer;white-space:nowrap}.lang-choice.active{background:var(--gold,#e8b84b);color:#0b4035}.lang-choice:focus-visible{outline:2px solid var(--gold,#e8b84b);outline-offset:2px}@media(max-width:520px){.lang-switch{gap:2px;padding:3px}.lang-choice{font-size:.7rem;padding:6px 7px}}
+
+/* v63 mobile install button: keep it clear of bottom navigation labels */
+@media(max-width:700px){.global-install-pulse{width:48px!important;height:48px!important;left:18px!important;bottom:calc(18px + env(safe-area-inset-bottom))!important;z-index:19!important}.global-install-pulse span{font-size:23px!important}.global-install-pulse:before{inset:-4px!important}#nav{z-index:20!important}}
