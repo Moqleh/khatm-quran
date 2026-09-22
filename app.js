@@ -155,3 +155,28 @@ if($('#ptCountry')){const country=$('#ptCountry');country.innerHTML='<option val
 // v41 — Qibla uses the same controlled country/city lists as prayer times.
 function fillQiblaCities(country,selected=''){const city=$('#qiblaCity');if(!city)return;city.innerHTML='<option value="">اختر المدينة</option>'+((prayerPlaces[country]||[]).map(x=>'<option value="'+x+'">'+x+'</option>').join(''));city.disabled=!country;if(selected&&[...city.options].some(o=>o.value===selected))city.value=selected}
 if($('#qiblaCountry')){const country=$('#qiblaCountry');country.innerHTML='<option value="">اختر الدولة</option>'+Object.keys(prayerPlaces).map(x=>'<option value="'+x+'">'+x+'</option>').join('');country.onchange=()=>fillQiblaCities(country.value);}
+
+
+// v42 — polished prayer dashboard, install CTA, and notification permission.
+let prayerCountdownTimer=null,deferredInstallPrompt=null,lastPrayerSchedule=null;
+function cleanPrayerTime(v){const m=String(v||'').match(/\d{1,2}:\d{2}/);return m?m[0]:'—'}
+function prayerIcon(k){return {Fajr:'☀',Sunrise:'◒',Dhuhr:'◉',Asr:'◷',Maghrib:'◐',Isha:'☾'}[k]||'•'}
+function renderPrayerDashboard(t,label,dateData){
+ const now=new Date(),mins=now.getHours()*60+now.getMinutes(),salat=prayerNamesFull.filter(x=>x[0]!=='Sunrise');
+ let next=salat.find(x=>{const [hh,mm]=cleanPrayerTime(t[x[0]]).split(':').map(Number);return hh*60+mm>mins}),tomorrow=false;
+ if(!next){next=salat[0];tomorrow=true}
+ const nextKey=next[0],nextTime=cleanPrayerTime(t[nextKey]);
+ $('#ptLocationTitle').textContent=label||'مواقيت اليوم';
+ $('#ptGrid').innerHTML=prayerNamesFull.map(x=>'<div class="prayer-row '+(x[0]===nextKey?'is-next':'')+'"><span class="prayer-row-icon">'+prayerIcon(x[0])+'</span><b>'+x[1]+'</b>'+(x[0]===nextKey?'<em>التالية</em>':'')+'<strong>'+cleanPrayerTime(t[x[0]])+'</strong></div>').join('');
+ $('#ptNext').innerHTML='<span>متبقي حتى '+next[1]+'</span><b id="ptCountdown">--:--:--</b><small>'+nextTime+(tomorrow?' • غدًا':'')+'</small>';
+ const g=dateData?.gregorian?.date||'',hh=dateData?.hijri;$('#ptDate').textContent=(hh?hh.day+' '+hh.month.ar+' '+hh.year+' هـ':'')+(g?' • '+g:'');
+ lastPrayerSchedule={t,label,dateData};startPrayerCountdown(nextTime,tomorrow);
+}
+function startPrayerCountdown(time,tomorrow){clearInterval(prayerCountdownTimer);const tick=()=>{const el=$('#ptCountdown');if(!el)return;const [h,m]=time.split(':').map(Number),now=new Date(),target=new Date(now);target.setHours(h,m,0,0);if(tomorrow||target<=now)target.setDate(target.getDate()+1);let sec=Math.max(0,Math.floor((target-now)/1000));const hh=String(Math.floor(sec/3600)).padStart(2,'0'),mm=String(Math.floor(sec%3600/60)).padStart(2,'0'),ss=String(sec%60).padStart(2,'0');el.textContent=hh+':'+mm+':'+ss};tick();prayerCountdownTimer=setInterval(tick,1000)}
+const oldLoadCityPrayers=loadCityPrayers;loadCityPrayers=async function(){const city=$('#ptCity').value.trim(),country=$('#ptCountry').value.trim(),method=$('#ptMethod').value;if(!city||!country){$('#ptLocationTitle').textContent='اختر الدولة والمدينة أولًا';return}$('#ptLocationTitle').textContent='جاري تحميل المواقيت…';try{const r=await fetch('https://api.aladhan.com/v1/timingsByCity?city='+encodeURIComponent(city)+'&country='+encodeURIComponent(country)+'&method='+encodeURIComponent(method)),j=await r.json();if(!r.ok||!j.data)throw 0;renderPrayerDashboard(j.data.timings,city+'، '+country,j.data.date);localStorage.setItem('khatm-prayer-city',JSON.stringify({city,country,method}))}catch(e){$('#ptLocationTitle').textContent='تعذر تحميل المواقيت. تحقق من الاختيار وحاول مجددًا.'}};
+const oldLoadPrayerCoords=loadPrayerCoords;loadPrayerCoords=async function(lat,lon,label){const method=$('#ptMethod').value;$('#ptLocationTitle').textContent='جاري تحميل المواقيت…';try{const r=await fetch('https://api.aladhan.com/v1/timings/'+Math.floor(Date.now()/1000)+'?latitude='+encodeURIComponent(lat)+'&longitude='+encodeURIComponent(lon)+'&method='+encodeURIComponent(method)),j=await r.json();if(!r.ok||!j.data)throw 0;renderPrayerDashboard(j.data.timings,label||'موقعك الحالي',j.data.date)}catch(e){$('#ptLocationTitle').textContent='تعذر تحميل المواقيت من موقعك الآن.'}};
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;$('#installAppBtn')?.classList.add('ready');if($('#installAppState'))$('#installAppState').textContent='اضغط للتثبيت على الشاشة الرئيسية'});
+window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;$('#installAppBtn')?.classList.remove('ready','install-pulse');if($('#installAppState'))$('#installAppState').textContent='تم تثبيت التطبيق'});
+if($('#installAppBtn'))$('#installAppBtn').onclick=async()=>{if(deferredInstallPrompt){await deferredInstallPrompt.prompt();deferredInstallPrompt=null;return}const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);showInfo('تثبيت التطبيق',ios?'من Safari اضغط زر المشاركة ثم «إضافة إلى الشاشة الرئيسية».':'من قائمة المتصفح اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».')};
+if($('#prayerReminderBtn'))$('#prayerReminderBtn').onclick=async()=>{if(!('Notification' in window)){showInfo('التذكير','هذا المتصفح لا يدعم إشعارات الويب.');return}const p=await Notification.requestPermission();if(p==='granted'){localStorage.setItem('khatm-prayer-reminders','1');$('#prayerReminderState').textContent='الإشعارات مفعّلة';try{const reg=await navigator.serviceWorker.ready;await reg.showNotification('تم تفعيل تذكير الصلاة',{body:'سيستخدم اختم قرآنك الإشعارات المتاحة على جهازك.',icon:'./logo.png',tag:'prayer-reminders-enabled'})}catch(e){}}else $('#prayerReminderState').textContent='لم يتم منح إذن الإشعارات'};
+if($('#prayerReminderState')&&localStorage.getItem('khatm-prayer-reminders')==='1')$('#prayerReminderState').textContent='الإشعارات مفعّلة';
