@@ -465,3 +465,31 @@ const HIJRI_EN77=['Muharram','Safar','Rabi al-Awwal','Rabi al-Thani','Jumada al-
 hijriDate75=function(h){if(!h)return'';const n=Number(h.month?.number||0);let month;if(state.lang==='ar')month=h.month?.ar||'';else if(state.lang==='en')month=HIJRI_EN77[n-1]||h.month?.en||'';else month=HM72.ur[n-1]||h.month?.en||'';return h.day+' '+month+' '+h.year+(state.lang==='ar'?' هـ':state.lang==='en'?' AH':' ہجری')};
 const _renderPrayer77=renderPrayerDashboardV51;
 renderPrayerDashboardV51=function(t,label,dateData,timeZone){return _renderPrayer77(t,locationLabel77(label),dateData,timeZone)};
+
+
+// v78 — canonicalize stale localized values already persisted in localStorage.
+const LOCATION_AR78=new Set(['موقعك الحالي','الموقع المحفوظ']);
+function normalizeLocation78(label){
+ if(!label)return p75().current;
+ if(LOCATION_AR78.has(label))return state.lang==='en'?'Your current location':state.lang==='ur'?'آپ کا موجودہ مقام':label;
+ return locationLabel77(label);
+}
+function normalizePrayerCache78(){
+ try{
+  const raw=localStorage.getItem('khatm-last-prayers');if(!raw)return;
+  const c=JSON.parse(raw);if(c&&LOCATION_AR78.has(c.label)){c.label='__CURRENT_LOCATION__';localStorage.setItem('khatm-last-prayers',JSON.stringify(c))}
+ }catch(e){}
+}
+const _renderPrayer78=renderPrayerDashboardV51;
+renderPrayerDashboardV51=function(t,label,dateData,timeZone){
+ if(label==='__CURRENT_LOCATION__')label=p75().current;else label=normalizeLocation78(label);
+ const r=_renderPrayer78(t,label,dateData,timeZone);
+ // Force canonical English Hijri month after all legacy wrappers have completed.
+ if(state.lang==='en'&&dateData?.hijri&&dateData?.gregorian){
+  const h=dateData.hijri,g=dateData.gregorian,n=Number(h.month?.number||0),m=HIJRI_EN77[n-1]||h.month?.en||'';
+  $('#ptDate').textContent=h.day+' '+m+' '+h.year+' AH • '+g.day+' '+(g.month?.en||'')+' '+g.year;
+ }
+ $('#ptLocationTitle').textContent=label;
+ return r;
+};
+window.addEventListener('DOMContentLoaded',()=>{normalizePrayerCache78();setTimeout(rerenderPrayer76,0)});
