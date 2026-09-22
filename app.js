@@ -493,3 +493,61 @@ renderPrayerDashboardV51=function(t,label,dateData,timeZone){
  return r;
 };
 window.addEventListener('DOMContentLoaded',()=>{normalizePrayerCache78();setTimeout(rerenderPrayer76,0)});
+
+
+// v79 — root fix: prayer locations are stored as language-neutral keys, never as display text.
+const LOCATION_KEY79={current:'current',saved:'saved'};
+function locationModel79(input){
+ if(!input)return {kind:'current'};
+ if(typeof input==='object'&&input.kind)return input;
+ if(input==='__CURRENT_LOCATION__'||input==='موقعك الحالي'||input==='Your current location'||input==='آپ کا موجودہ مقام')return {kind:'current'};
+ if(input==='الموقع المحفوظ'||input==='Saved location'||input==='محفوظ مقام')return {kind:'saved'};
+ // Legacy manual label: "city، country" / "city, country".
+ const parts=String(input).split(/\s*[،,]\s*/);
+ if(parts.length>=2)return {kind:'city',city:parts[0],country:parts.slice(1).join(', ')};
+ return {kind:'text',value:String(input)};
+}
+function displayLocation79(input){
+ const m=locationModel79(input);
+ if(m.kind==='current')return p75().current;
+ if(m.kind==='saved')return p75().saved;
+ if(m.kind==='city')return place72(m.city)+', '+place72(m.country);
+ return state.lang==='en'?(PLACE_EN[m.value]||m.value):m.value;
+}
+function migrateLocationStorage79(){
+ try{
+  const raw=localStorage.getItem('khatm-last-prayers');if(raw){const c=JSON.parse(raw);if(c){c.location=locationModel79(c.location||c.label);delete c.label;localStorage.setItem('khatm-last-prayers',JSON.stringify(c))}}
+  const raw2=localStorage.getItem(SHARED_LOCATION_KEY);if(raw2){const x=JSON.parse(raw2);if(x){x.location=locationModel79(x.location||x.label);delete x.label;localStorage.setItem(SHARED_LOCATION_KEY,JSON.stringify(x))}}
+ }catch(e){console.error('location migration',e)}
+}
+saveSharedLocation=function(lat,lon,label){try{localStorage.setItem(SHARED_LOCATION_KEY,JSON.stringify({lat:Number(lat),lon:Number(lon),location:locationModel79(label),ts:Date.now()}))}catch(e){}};
+getSharedLocation=function(){try{const x=JSON.parse(localStorage.getItem(SHARED_LOCATION_KEY)||'null');if(!x||!Number.isFinite(x.lat)||!Number.isFinite(x.lon))return null;x.location=locationModel79(x.location||x.label);x.label=displayLocation79(x.location);return x}catch(e){return null}};
+useSharedLocationAcrossPages=function(lat,lon,label){const model=locationModel79(label);saveSharedLocation(lat,lon,model);const shown=displayLocation79(model);try{setQibla(lat,lon,shown)}catch(e){}try{loadPrayerCoords(lat,lon,model)}catch(e){}};
+const _renderPrayer79=renderPrayerDashboardV51;
+renderPrayerDashboardV51=function(t,label,dateData,timeZone){
+ const model=locationModel79(label),shown=displayLocation79(model);
+ const r=_renderPrayer79(t,shown,dateData,timeZone);
+ lastPrayerSchedule={t,location:model,dateData,timeZone};
+ try{localStorage.setItem('khatm-last-prayers',JSON.stringify(lastPrayerSchedule))}catch(e){}
+ $('#ptLocationTitle').textContent=shown;
+ return r;
+};
+loadCityPrayers=async function(){
+ const city=$('#ptCity').value.trim(),country=$('#ptCountry').value.trim(),method=$('#ptMethod').value;
+ if(!city||!country){$('#ptLocationTitle').textContent=state.lang==='en'?'Choose a country and city first':state.lang==='ur'?'پہلے ملک اور شہر منتخب کریں':'اختر الدولة والمدينة أولًا';return}
+ $('#ptLocationTitle').textContent=state.lang==='en'?'Loading prayer times…':state.lang==='ur'?'نماز کے اوقات لوڈ ہو رہے ہیں…':'جاري تحميل المواقيت…';
+ try{
+  const r=await fetch('https://api.aladhan.com/v1/timingsByCity?city='+encodeURIComponent(city)+'&country='+encodeURIComponent(country)+'&method='+encodeURIComponent(method)),j=await r.json();if(!r.ok||!j.data)throw 0;
+  renderPrayerDashboardV51(j.data.timings,{kind:'city',city,country},j.data.date,j.data.meta?.timezone);
+  localStorage.setItem('khatm-prayer-city',JSON.stringify({city,country,method}));
+ }catch(e){showCachedPrayers(state.lang==='en'?'Connection failed; showing the last saved prayer times.':state.lang==='ur'?'رابطہ ناکام؛ آخری محفوظ نماز کے اوقات دکھائے جا رہے ہیں۔':'تعذر الاتصال؛ هذه آخر مواقيت محفوظة.')}
+};
+loadPrayerCoords=async function(lat,lon,label){
+ const method=$('#ptMethod').value,model=locationModel79(label);
+ $('#ptLocationTitle').textContent=state.lang==='en'?'Loading prayer times…':state.lang==='ur'?'نماز کے اوقات لوڈ ہو رہے ہیں…':'جاري تحميل المواقيت…';
+ try{const r=await fetch('https://api.aladhan.com/v1/timings/'+Math.floor(Date.now()/1000)+'?latitude='+encodeURIComponent(lat)+'&longitude='+encodeURIComponent(lon)+'&method='+encodeURIComponent(method)),j=await r.json();if(!r.ok||!j.data)throw 0;renderPrayerDashboardV51(j.data.timings,model,j.data.date,j.data.meta?.timezone)}
+ catch(e){showCachedPrayers(state.lang==='en'?'Could not load prayer times from your location.':state.lang==='ur'?'آپ کے مقام سے نماز کے اوقات لوڈ نہیں ہو سکے۔':'تعذر تحميل المواقيت من موقعك الآن.')}
+};
+showCachedPrayers=function(note){try{const c=JSON.parse(localStorage.getItem('khatm-last-prayers')||'null');if(c?.t){renderPrayerDashboardV51(c.t,c.location||c.label,c.dateData,c.timeZone);return}}catch(e){}$('#ptLocationTitle').textContent=note||p75().last};
+rerenderPrayer76=function(){try{const c=lastPrayerSchedule?.t?lastPrayerSchedule:JSON.parse(localStorage.getItem('khatm-last-prayers')||'null');if(c?.t)renderPrayerDashboardV51(c.t,c.location||c.label,c.dateData,c.timeZone)}catch(e){console.error('prayer language rerender',e)}};
+window.addEventListener('DOMContentLoaded',()=>{migrateLocationStorage79();setTimeout(rerenderPrayer76,0)});
