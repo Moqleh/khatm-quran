@@ -447,3 +447,21 @@ document.addEventListener('click',function(e){
  const b=e.target.closest('[data-set-lang]');if(!b)return;
  setTimeout(rerenderPrayer76,0);
 },true);
+
+
+// v77 — normalize persisted location labels and use readable Hijri month names in English.
+const PLACE_CANON77={
+ 'موقعك الحالي':{en:'Your current location',ur:'آپ کا موجودہ مقام'},
+ 'الموقع المحفوظ':{en:'Saved location',ur:'محفوظ مقام'}
+};
+function locationLabel77(label){
+ if(!label)return p75().current;
+ if(state.lang==='ar')return label;
+ if(PLACE_CANON77[label])return PLACE_CANON77[label][state.lang]||label;
+ if(state.lang==='en'&&PLACE_EN[label])return PLACE_EN[label];
+ return label;
+}
+const HIJRI_EN77=['Muharram','Safar','Rabi al-Awwal','Rabi al-Thani','Jumada al-Awwal','Jumada al-Thani','Rajab','Shaban','Ramadan','Shawwal','Dhul Qadah','Dhul Hijjah'];
+hijriDate75=function(h){if(!h)return'';const n=Number(h.month?.number||0);let month;if(state.lang==='ar')month=h.month?.ar||'';else if(state.lang==='en')month=HIJRI_EN77[n-1]||h.month?.en||'';else month=HM72.ur[n-1]||h.month?.en||'';return h.day+' '+month+' '+h.year+(state.lang==='ar'?' هـ':state.lang==='en'?' AH':' ہجری')};
+const _renderPrayer77=renderPrayerDashboardV51;
+renderPrayerDashboardV51=function(t,label,dateData,timeZone){return _renderPrayer77(t,locationLabel77(label),dateData,timeZone)};
