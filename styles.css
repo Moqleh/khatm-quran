@@ -42,3 +42,6 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
 
 /* v9 official uploaded logo */
 .logo-image{width:58px!important;height:58px!important;padding:0!important;overflow:hidden;border-radius:50%!important;border:1px solid rgba(221,182,90,.55)!important;background:#00372d!important;box-shadow:0 5px 18px rgba(0,0,0,.18)}.logo-image img{width:100%;height:100%;object-fit:cover;display:block}.brand{gap:12px}.brand b{font-size:20px}@media(max-width:700px){.logo-image{width:54px!important;height:54px!important}.brand small{font-size:10px}}
+
+/* v16 contact layout */
+.contact-links{display:grid;gap:12px;margin-top:18px}.contact-links a{display:flex;flex-direction:column;gap:5px;align-items:center;justify-content:center;width:100%;padding:14px 12px;border:1px solid var(--line);border-radius:15px;text-decoration:none;color:var(--ink);overflow:hidden}.contact-links a span{font-size:12px;color:var(--muted)}.contact-links a b{max-width:100%;font-size:clamp(14px,4vw,18px);overflow-wrap:anywhere;word-break:break-word;color:var(--gold)}
