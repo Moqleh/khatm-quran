@@ -265,3 +265,9 @@ function applyStaticPhrasesV59(lang){$$('[data-l10n]').forEach(e=>{const k=e.dat
 const _applyLangV59=applyLang;applyLang=function(){_applyLangV59();applyStaticPhrasesV59(state.lang);document.documentElement.dir=state.lang==='en'?'ltr':'rtl';document.body.classList.toggle('lang-ur',state.lang==='ur');document.querySelectorAll('[aria-label]').forEach(el=>{const x=localizeTextV59(el.getAttribute('aria-label'),state.lang);if(x)el.setAttribute('aria-label',x)})};
 const l10nObserver=new MutationObserver(ms=>{if(state.lang==='ar')return;for(const m of ms){for(const node of m.addedNodes){if(node.nodeType===3){node.nodeValue=localizeTextV59(node.nodeValue,state.lang)}else if(node.nodeType===1){const walk=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);let x;while(x=walk.nextNode())x.nodeValue=localizeTextV59(x.nodeValue,state.lang)}}}});l10nObserver.observe(document.body,{childList:true,subtree:true});
 applyLang();
+
+// v60 — explicit three-button language selector
+function syncLanguageButtonsV60(){$$('[data-set-lang]').forEach(b=>{const on=b.dataset.setLang===state.lang;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on?'true':'false')})}
+$$('[data-set-lang]').forEach(b=>b.onclick=()=>{state.lang=b.dataset.setLang;save();applyLang();syncLanguageButtonsV60()});
+const _applyLangV60=applyLang;applyLang=function(){_applyLangV60();syncLanguageButtonsV60()};
+const legacyLangBtn=$('#langBtn');if(legacyLangBtn)legacyLangBtn.remove();applyLang();
