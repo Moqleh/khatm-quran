@@ -225,3 +225,16 @@ const cachedAtBoot=localStorage.getItem('khatm-last-prayers');if(cachedAtBoot&&!
 
 // v52 — privacy control
 if($('#forgetLocationBtn'))$('#forgetLocationBtn').onclick=()=>{localStorage.removeItem(SHARED_LOCATION_KEY);localStorage.removeItem('khatm-last-prayers');$('#forgetLocationBtn').textContent='تم حذف الموقع';setTimeout(()=>$('#forgetLocationBtn').textContent='نسيان الموقع',1800)};
+
+
+// v53 — editable plan from progress page + safe undo for Wird completion.
+const KHATM_PLAN_DAYS=[7,10,15,20,30,40,60,90];
+function renderStatsPlans(){if(!$('#statsPlans'))return;$('#statsPlans').innerHTML=KHATM_PLAN_DAYS.map(d=>'<button data-stats-days="'+d+'" class="'+(d===state.days?'selected':'')+'">'+(d===7?'أسبوع':d+' يومًا')+'</button>').join('');const elapsed=Math.max(1,Math.floor((new Date()-new Date(state.start+'T00:00:00'))/864e5)+1),left=Math.max(0,TOTAL-state.completed),remainingDays=Math.max(1,state.days-elapsed+1);$('#statsPlanAvg').textContent=left?'≈ '+Math.ceil(left/remainingDays)+' صفحة يوميًا':'الختمة مكتملة';$$('[data-stats-days]').forEach(b=>b.onclick=()=>{const d=+b.dataset.statsDays;if(d===state.days)return;state.days=d;save();render();updateStatsPage();renderStatsPlans();renderMainPlanChoices()})}
+function renderMainPlanChoices(){if(!$('#plans'))return;$$('#plans button').forEach(b=>b.classList.toggle('selected',+b.dataset.d===state.days))}
+const _updateStatsPageV53=updateStatsPage;updateStatsPage=function(){_updateStatsPageV53();renderStatsPlans()};
+let lastWirdUndo=null;
+function updateWirdCompletionControls(){if(!wirdCtx||!$('#undoWird'))return;const done=state.done.includes(wirdCtx.index);$('#undoWird').hidden=!done;$('#finishWird').hidden=done;$('#finishWird').disabled=!done&&wirdCtx.page<wirdCtx.end}
+const _renderWirdV53=renderWird;renderWird=function(){_renderWirdV53();updateWirdCompletionControls()};
+$('#finishWird').onclick=()=>{if(!wirdCtx||wirdCtx.page<wirdCtx.end)return;lastWirdUndo={completed:state.completed,done:[...state.done],ctx:{...wirdCtx}};if(!state.done.includes(wirdCtx.index))state.done.push(wirdCtx.index);const d=getDailyWird();if(state.done.length>=d.parts){state.completed=Math.min(TOTAL,d.end);state.done=[]}save();render();updateStatsPage();$('#undoWird').hidden=false;$('#finishWird').hidden=true;showInfo('تم تسجيل الورد','تم احتساب هذا الورد في تقدم الختمة. يمكنك إلغاء الإتمام إذا كان الضغط بالخطأ.');};
+if($('#undoWird'))$('#undoWird').onclick=()=>{if(lastWirdUndo){state.completed=lastWirdUndo.completed;state.done=[...lastWirdUndo.done];wirdCtx={...lastWirdUndo.ctx};lastWirdUndo=null}else if(wirdCtx&&state.done.includes(wirdCtx.index)){state.done=state.done.filter(i=>i!==wirdCtx.index)}else{return}save();render();updateStatsPage();renderWird();showInfo('تم التراجع','أُلغي تسجيل إتمام الورد ولم يعد محسوبًا في تقدم الختمة.')};
+renderStatsPlans();
