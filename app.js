@@ -202,7 +202,7 @@ const _locatePrayerTimes=locatePrayerTimes;locatePrayerTimes=function(){if(!navi
 const _locateQibla=locateQibla;locateQibla=function(){const saved=getSharedLocation();if(saved){setQibla(saved.lat,saved.lon,saved.label);return}if(!navigator.geolocation){$('#qiblaStatus').textContent='الموقع غير مدعوم في هذا المتصفح';return}$('#qiblaStatus').textContent='جاري تحديد موقعك…';navigator.geolocation.getCurrentPosition(p=>useSharedLocationAcrossPages(p.coords.latitude,p.coords.longitude,'موقعك الحالي'),()=>{$('#qiblaStatus').textContent='تعذر الوصول إلى موقعك. اختر الدولة والمدينة.'},{enableHighAccuracy:true,timeout:10000,maximumAge:600000})};
 if($('#ptLocateBtn'))$('#ptLocateBtn').onclick=locatePrayerTimes;if($('#qiblaLocateBtn'))$('#qiblaLocateBtn').onclick=locateQibla;
 const savedSharedLocation=getSharedLocation();if(savedSharedLocation){try{setQibla(savedSharedLocation.lat,savedSharedLocation.lon,savedSharedLocation.label)}catch(e){}try{loadPrayerCoords(savedSharedLocation.lat,savedSharedLocation.lon,savedSharedLocation.label)}catch(e){}}
-function runInstallAction(){if($('#installAppBtn'))$('#installAppBtn').click()}
+function runInstallAction(){installKhatmApp()}
 if($('#globalInstallBtn'))$('#globalInstallBtn').onclick=runInstallAction;
 window.addEventListener('beforeinstallprompt',()=>$('#globalInstallBtn')?.classList.add('install-ready'));
 window.addEventListener('appinstalled',()=>{$('#globalInstallBtn')?.classList.add('installed');});
