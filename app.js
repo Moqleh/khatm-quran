@@ -371,3 +371,37 @@ document.addEventListener('click',function(e){
  else if(b.id==='zoomOut')setMushafZoom73(mushafScale-.25);
  else resetZoom();
 },true);
+
+
+// v74 — complete visible runtime localization sweep for EN/UR.
+// Legacy modules still generate Arabic HTML; translate their visible output at the DOM boundary.
+const PHRASE74={
+'بياناتك':['Your data','آپ کا ڈیٹا'],'تصدير JSON':['Export JSON','JSON برآمد کریں'],'استيراد JSON':['Import JSON','JSON درآمد کریں'],
+'النسخة تشمل تقدم الختمة والإعدادات وعلامات صفحات المصحف.':['The backup includes Khatm progress, settings and Quran page bookmarks.','بیک اپ میں ختم کی پیش رفت، ترتیبات اور قرآن صفحات کے بُک مارکس شامل ہیں۔'],
+'تعذر التحقق من فهرس صفحات المصحف. لن نعرض صفحات غير متحقق من بنيتها.':['The Mushaf page index could not be verified. Unverified pages will not be shown.','مصحف صفحات کے اشاریے کی تصدیق نہیں ہو سکی۔ غیر تصدیق شدہ صفحات نہیں دکھائے جائیں گے۔'],
+'لا توجد علامات بعد':['No bookmarks yet','ابھی کوئی بُک مارک نہیں'],'يمكنك حفظ صفحة القراءة الحالية من زر العلامات.':['Save the current reading page with the bookmark button.','موجودہ مطالعہ صفحہ بُک مارک بٹن سے محفوظ کریں۔'],'افتح القرآن':['Open Quran','قرآن کھولیں'],
+'العودة إلى موضع القراءة':['Return to reading position','مطالعہ کی جگہ پر واپس جائیں'],'تم الحفظ':['Saved','محفوظ ہوگیا'],
+'الختمة مكتملة':['Khatm completed','ختم مکمل'],'تم إتمام صفحات الختمة الحالية.':['The current Khatm pages are complete.','موجودہ ختم کے صفحات مکمل ہوگئے۔'],
+'أدخل المدينة والدولة.':['Enter a city and country.','شہر اور ملک درج کریں۔'],'أدخل المدينة والدولة أولًا':['Enter a city and country first.','پہلے شہر اور ملک درج کریں۔'],'حدّد موقعك أولًا':['Set your location first','پہلے اپنا مقام مقرر کریں'],
+'الصلاة القادمة':['Next prayer','اگلی نماز'],'التالية':['Next','اگلی'],'غدًا':['Tomorrow','کل'],'مواقيت اليوم':['Today’s prayer times','آج کے نماز کے اوقات'],'موقعك الحالي':['Your current location','آپ کا موجودہ مقام'],
+'اضغط للتثبيت على الشاشة الرئيسية':['Tap to install on the Home screen','ہوم اسکرین پر انسٹال کرنے کے لیے دبائیں'],'تم تثبيت التطبيق':['App installed','ایپ انسٹال ہوگئی'],
+'الإشعارات مفعّلة':['Notifications enabled','اطلاعات فعال'],'لم يتم منح إذن الإشعارات':['Notification permission was not granted','اطلاعات کی اجازت نہیں دی گئی'],
+'الإذن مفعّل • التنبيه التلقائي يحتاج خدمة Push':['Permission enabled • automatic alerts require Push service','اجازت فعال • خودکار اطلاع کے لیے Push سروس درکار ہے'],
+'تم حذف الموقع':['Location deleted','مقام حذف ہوگیا'],'نسيان الموقع':['Forget location','مقام بھول جائیں'],
+'آخر بيانات محفوظة':['Last saved data','آخری محفوظ ڈیٹا'],'تعذر تحميل المواقيت الآن.':['Prayer times could not be loaded right now.','نماز کے اوقات ابھی لوڈ نہیں ہو سکے۔'],
+'الموقع غير مدعوم في هذا المتصفح':['Location is not supported in this browser','اس براؤزر میں مقام کی سہولت دستیاب نہیں'],'جاري تحديد موقعك…':['Getting your location…','آپ کا مقام معلوم کیا جا رہا ہے…'],
+'تعذر الوصول إلى موقعك. يمكنك اختيار الدولة والمدينة.':['Your location could not be accessed. Choose a country and city instead.','آپ کے مقام تک رسائی نہیں ہو سکی۔ ملک اور شہر منتخب کریں۔'],
+'تعذر الوصول إلى موقعك. اختر الدولة والمدينة.':['Your location could not be accessed. Choose a country and city.','آپ کے مقام تک رسائی نہیں ہو سکی۔ ملک اور شہر منتخب کریں۔'],
+'اختر الدولة والمدينة أولًا':['Choose a country and city first','پہلے ملک اور شہر منتخب کریں'],'جاري تحميل المواقيت…':['Loading prayer times…','نماز کے اوقات لوڈ ہو رہے ہیں…'],
+'تعذر تحميل المواقيت من موقعك الآن.':['Prayer times could not be loaded from your location.','آپ کے مقام سے نماز کے اوقات لوڈ نہیں ہو سکے۔'],
+'تعذر العثور على المدينة الآن.':['The city could not be found right now.','اس وقت شہر نہیں مل سکا۔'],'جاري تحديد المدينة…':['Finding the city…','شہر تلاش کیا جا رہا ہے…']
+};
+function tr74(s){if(state.lang==='ar'||typeof s!=='string')return s;const ix=state.lang==='en'?0:1;let out=s;for(const [ar,v] of Object.entries(PHRASE74))out=out.split(ar).join(v[ix]);if(state.lang==='en'){out=out.replace(/صفحة\s*(\d+)/g,'Page $1').replace(/الصفحات\s*(\d+)–(\d+)/g,'Pages $1–$2').replace(/ورد\s*/g,'Wird ').replace(/من\s*(\d+)/g,'of $1').replace(/جاري تحميل الصفحة\s*(\d+)…/g,'Loading page $1…').replace(/تعذر تحميل صفحة المصحف رقم\s*(\d+)/g,'Could not load Mushaf page $1').replace(/تعذر تحميل صفحة الورد رقم\s*(\d+)/g,'Could not load Wird page $1').replace(/المسار:/g,'Path:');}return out}
+function localizeNode74(root){
+ if(state.lang==='ar'||!root)return;
+ const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];while(w.nextNode())nodes.push(w.currentNode);for(const n of nodes){const x=tr74(n.nodeValue);if(x!==n.nodeValue)n.nodeValue=x}
+ if(root.querySelectorAll)root.querySelectorAll('option').forEach(o=>{if(state.lang==='en'&&PLACE_EN[o.textContent])o.textContent=PLACE_EN[o.textContent]});
+}
+const runtimeObserver74=new MutationObserver(ms=>{if(state.lang==='ar')return;runtimeObserver74.disconnect();try{for(const m of ms){for(const n of m.addedNodes)localizeNode74(n);if(m.type==='characterData')localizeNode74(m.target.parentNode)}}finally{runtimeObserver74.observe(document.body,{subtree:true,childList:true,characterData:true})}});
+window.addEventListener('DOMContentLoaded',()=>{localizeNode74(document.body);runtimeObserver74.observe(document.body,{subtree:true,childList:true,characterData:true})});
+const _applyLanguage74=applyLanguageV63;applyLanguageV63=function(){_applyLanguage74();localizeNode74(document.body)};
