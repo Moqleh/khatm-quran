@@ -163,3 +163,9 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
 #more .more-link:hover,#more details:hover{border-color:rgba(221,182,90,.35)!important}
 #more .sectionTitle{text-align:center}
 @media(max-width:600px){#more .more-list{gap:8px}#more .more-link,#more details>summary{min-height:58px;padding-inline:15px!important;font-size:15px}}
+
+/* v48 — match home and progress percentage rings */
+#home .ring,.progress-circle{width:150px!important;height:150px!important;aspect-ratio:1!important;border-radius:50%!important;box-sizing:border-box!important;display:grid!important;place-content:center!important;text-align:center!important;background:#10372f!important;border:3px solid var(--app-gold)!important;box-shadow:0 0 0 10px #155144!important}
+#home .ring span,.progress-circle b{display:block!important;font-size:34px!important;line-height:1!important;font-weight:900!important;color:var(--app-gold)!important}
+#home .ring small,.progress-circle span{display:block!important;margin-top:7px!important;font-size:12px!important;line-height:1.2!important;color:var(--app-cream)!important}
+@media(max-width:600px){#home .ring,.progress-circle{width:132px!important;height:132px!important;box-shadow:0 0 0 8px #155144!important}#home .ring span,.progress-circle b{font-size:32px!important}}
