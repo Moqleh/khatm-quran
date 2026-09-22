@@ -151,3 +151,15 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
 .hijri-fields select{width:100%!important}
 .calendar-convert .primary{margin-top:0!important}
 @media(max-width:520px){.hijri-fields{grid-template-columns:1fr 1.7fr 1.25fr!important}.hijri-fields label:last-child{grid-column:auto!important}.calendar-convert input,.calendar-convert select{font-size:16px!important}}
+
+/* v47 — polished More / information accordion */
+#more .more-list{max-width:700px;margin:0 auto;display:grid;gap:10px}
+#more .more-link,#more details{width:100%;border:1px solid rgba(247,240,223,.10)!important;border-radius:18px!important;background:#0a332c!important;overflow:hidden}
+#more .more-link,#more details>summary{min-height:64px;padding:0 18px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px;color:var(--app-cream)!important;font-size:16px!important;font-weight:800!important;text-decoration:none!important;cursor:pointer;list-style:none}
+#more details>summary::-webkit-details-marker{display:none}
+#more details>summary:after,#more .more-link:after{content:"‹";width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;border-radius:11px;background:rgba(221,182,90,.09);color:var(--app-gold);font-size:22px;transition:transform .2s ease}
+#more details[open]>summary:after{transform:rotate(-90deg)}
+#more details>div,#more details>p{margin:0;padding:0 18px 18px;color:var(--muted);line-height:1.8}
+#more .more-link:hover,#more details:hover{border-color:rgba(221,182,90,.35)!important}
+#more .sectionTitle{text-align:center}
+@media(max-width:600px){#more .more-list{gap:8px}#more .more-link,#more details>summary{min-height:58px;padding-inline:15px!important;font-size:15px}}
