@@ -330,3 +330,25 @@ applyLanguageV63=function(){_applyLanguageV72();const sl=$('#settingsLang');if(s
 const _updateStatsV72=updateStatsPage;
 updateStatsPage=function(){_updateStatsV72();if($('#statProgressText'))$('#statProgressText').textContent=ui72().progress(state.completed,TOTAL)};
 window.addEventListener('DOMContentLoaded',()=>{try{applyLanguageV63()}catch(e){console.error('v72 localization boot',e)}});
+
+
+// v72.1 — final localization guard: prevent legacy Arabic runtime status strings leaking into EN/UR.
+const LEGACY72={
+ 'تم حساب الاتجاه بطريقة الدائرة العظمى نحو الكعبة.':['Qibla direction calculated using the great-circle route to the Kaaba.','قبلہ کا رخ کعبہ تک عظیم دائرے کے طریقے سے شمار کیا گیا ہے۔'],
+ 'تحديد الموقع غير متاح على هذا الجهاز.':['Location is unavailable on this device.','اس آلے پر مقام دستیاب نہیں ہے۔'],
+ 'جاري تحديد موقعك…':['Getting your location…','آپ کا مقام معلوم کیا جا رہا ہے…'],
+ 'لم يتم منح إذن الموقع. استخدم المدينة والدولة بدلًا منه.':['Location permission was not granted. Choose a country and city instead.','مقام کی اجازت نہیں دی گئی۔ ملک اور شہر منتخب کریں۔'],
+ 'اختر الدولة والمدينة.':['Choose a country and city.','ملک اور شہر منتخب کریں۔'],
+ 'اختر الدولة والمدينة أولًا':['Choose a country and city first.','پہلے ملک اور شہر منتخب کریں۔'],
+ 'جاري تحديد المدينة…':['Finding the city…','شہر تلاش کیا جا رہا ہے…'],
+ 'تعذر العثور على المدينة الآن.':['The city could not be found right now.','اس وقت شہر نہیں مل سکا۔'],
+ 'جاري تحميل المواقيت…':['Loading prayer times…','نماز کے اوقات لوڈ ہو رہے ہیں…'],
+ 'تعذر تحميل المواقيت من موقعك الآن.':['Prayer times could not be loaded from your location.','آپ کے مقام سے نماز کے اوقات لوڈ نہیں ہو سکے۔'],
+ 'الإشعارات مفعّلة':['Notifications are enabled','اطلاعات فعال ہیں'],
+ 'لم يتم منح إذن الإشعارات':['Notification permission was not granted','اطلاعات کی اجازت نہیں دی گئی'],
+ 'تم حذف الموقع':['Saved location deleted','محفوظ مقام حذف کر دیا گیا'],
+ 'نسيان الموقع':['Forget location','مقام بھول جائیں']
+};
+function translateLegacy72(v){if(state.lang==='ar'||typeof v!=='string')return v;const p=LEGACY72[v];return p?p[state.lang==='en'?0:1]:v}
+const _setText72=Object.getOwnPropertyDescriptor(Node.prototype,'textContent');
+if(_setText72&&_setText72.set&&!window.__KHATM_TEXT_GUARD_72__){Object.defineProperty(Node.prototype,'textContent',{configurable:true,enumerable:_setText72.enumerable,get:_setText72.get,set:function(v){return _setText72.set.call(this,translateLegacy72(v))}});window.__KHATM_TEXT_GUARD_72__=true}
