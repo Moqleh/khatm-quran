@@ -57,3 +57,6 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
 .logo.logo-image:before,.logo.logo-image:after{content:none!important;display:none!important}
 .logo.logo-image img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;background:transparent}
 @media(max-width:600px){.logo.logo-image{width:52px;height:52px;flex-basis:52px;border-radius:14px}.brand{gap:10px}.brand b{font-size:18px}}
+
+/* v21 audit fixes */
+#markReaderPage:disabled{opacity:.5;cursor:not-allowed}.mushaf-viewport img[hidden]{display:none!important}.reader .quran-source{line-height:1.7}.settings-list .goto{margin:0}.mushaf-viewport{background:#eee8da}
