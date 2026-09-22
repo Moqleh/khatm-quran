@@ -60,3 +60,7 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
 
 /* v21 audit fixes */
 #markReaderPage:disabled{opacity:.5;cursor:not-allowed}.mushaf-viewport img[hidden]{display:none!important}.reader .quran-source{line-height:1.7}.settings-list .goto{margin:0}.mushaf-viewport{background:#eee8da}
+
+/* v33 — independent Khatm Wird reader */
+.free-reader-note{display:flex;align-items:center;justify-content:center;text-align:center;border:1px solid var(--line);border-radius:12px;padding:10px;color:var(--muted);font-size:12px}
+.wird-progressbar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:12px 0 4px}.wird-progressbar i{display:block;height:100%;width:0;background:var(--app-gold);border-radius:inherit;transition:width .2s ease}.wird-nav button:disabled{opacity:.45;cursor:not-allowed}.session.done{opacity:.62}.session.done:after{content:" ✓";color:var(--app-gold)}
