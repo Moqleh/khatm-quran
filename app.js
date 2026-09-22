@@ -112,10 +112,41 @@ if($('#qiblaLocateBtn'))$('#qiblaLocateBtn').onclick=locateQibla;if($('#qiblaCit
 const prayerNamesFull=[['Fajr','الفجر'],['Sunrise','الشروق'],['Dhuhr','الظهر'],['Asr','العصر'],['Maghrib','المغرب'],['Isha','العشاء']];
 async function loadCityPrayers(){const city=$('#ptCity').value.trim(),country=$('#ptCountry').value.trim(),method=$('#ptMethod').value;if(!city||!country){$('#ptLocationTitle').textContent='أدخل المدينة والدولة أولًا';return}$('#ptLocationTitle').textContent='جاري تحميل المواقيت…';$('#ptGrid').innerHTML='';try{const u='https://api.aladhan.com/v1/timingsByCity?city='+encodeURIComponent(city)+'&country='+encodeURIComponent(country)+'&method='+encodeURIComponent(method);const r=await fetch(u),j=await r.json();if(!r.ok||!j.data)throw 0;const t=j.data.timings;$('#ptLocationTitle').textContent=city+'، '+country;$('#ptGrid').innerHTML=prayerNamesFull.map(x=>'<div><span>'+x[1]+'</span><b>'+t[x[0]]+'</b></div>').join('');const now=new Date(),mins=now.getHours()*60+now.getMinutes(),salat=prayerNamesFull.filter(x=>x[0]!=='Sunrise');let next=salat.find(x=>{const z=t[x[0]].match(/\d{1,2}:\d{2}/);if(!z)return false;const [hh,mm]=z[0].split(':').map(Number);return hh*60+mm>mins});let tomorrow=false;if(!next){next=salat[0];tomorrow=true}$('#ptNext').innerHTML='<span>الصلاة القادمة</span><b>'+next[1]+'</b><small>'+t[next[0]]+(tomorrow?' • غدًا':'')+'</small>';const g=j.data.date?.gregorian?.date||'',h=j.data.date?.hijri;$('#ptDate').textContent=(h?h.day+' '+h.month.ar+' '+h.year+' هـ':'')+(g?' • '+g:'');localStorage.setItem('khatm-prayer-city',JSON.stringify({city,country,method}))}catch(e){$('#ptLocationTitle').textContent='تعذر تحميل المواقيت. تحقق من المدينة والدولة وحاول مرة أخرى.'}}
 if($('#ptLoadBtn'))$('#ptLoadBtn').onclick=loadCityPrayers;
-try{const p=JSON.parse(localStorage.getItem('khatm-prayer-city')||'null');if(p&&$('#ptCity')){$('#ptCity').value=p.city||'';$('#ptCountry').value=p.country||'';$('#ptMethod').value=p.method||'4'}}catch(e){}
+
 
 
 // v39 — prayer times can use explicit current location, with manual city kept as fallback.
 async function loadPrayerCoords(lat,lon,label){const method=$('#ptMethod').value;$('#ptLocationTitle').textContent='جاري تحميل المواقيت…';$('#ptGrid').innerHTML='';try{const u='https://api.aladhan.com/v1/timings/'+Math.floor(Date.now()/1000)+'?latitude='+encodeURIComponent(lat)+'&longitude='+encodeURIComponent(lon)+'&method='+encodeURIComponent(method);const r=await fetch(u),j=await r.json();if(!r.ok||!j.data)throw 0;const t=j.data.timings;$('#ptLocationTitle').textContent=label||'موقعك الحالي';$('#ptGrid').innerHTML=prayerNamesFull.map(x=>'<div><span>'+x[1]+'</span><b>'+t[x[0]]+'</b></div>').join('');const now=new Date(),mins=now.getHours()*60+now.getMinutes(),salat=prayerNamesFull.filter(x=>x[0]!=='Sunrise');let next=salat.find(x=>{const z=t[x[0]].match(/\d{1,2}:\d{2}/);if(!z)return false;const [hh,mm]=z[0].split(':').map(Number);return hh*60+mm>mins}),tomorrow=false;if(!next){next=salat[0];tomorrow=true}$('#ptNext').innerHTML='<span>الصلاة القادمة</span><b>'+next[1]+'</b><small>'+t[next[0]]+(tomorrow?' • غدًا':'')+'</small>';const g=j.data.date?.gregorian?.date||'',hh=j.data.date?.hijri;$('#ptDate').textContent=(hh?hh.day+' '+hh.month.ar+' '+hh.year+' هـ':'')+(g?' • '+g:'')}catch(e){$('#ptLocationTitle').textContent='تعذر تحميل المواقيت من موقعك الآن.'}}
 function locatePrayerTimes(){if(!navigator.geolocation){$('#ptLocationTitle').textContent='تحديد الموقع غير متاح على هذا الجهاز. استخدم المدينة والدولة.';return}$('#ptLocationTitle').textContent='جاري تحديد موقعك…';navigator.geolocation.getCurrentPosition(p=>loadPrayerCoords(p.coords.latitude,p.coords.longitude,'موقعك الحالي'),()=>$('#ptLocationTitle').textContent='لم يتم منح إذن الموقع. يمكنك إدخال المدينة والدولة يدويًا.',{enableHighAccuracy:true,timeout:10000})}
 if($('#ptLocateBtn'))$('#ptLocateBtn').onclick=locatePrayerTimes;
+
+
+// v40 — curated country/city selectors for prayer times.
+const prayerPlaces={
+'الأردن':['عمّان','الزرقاء','إربد','العقبة','السلط','مادبا','جرش','عجلون','الكرك','الطفيلة','معان','المفرق'],
+'السعودية':['الرياض','مكة المكرمة','المدينة المنورة','جدة','الدمام','الخبر','الطائف','تبوك','أبها','خميس مشيط','بريدة','حائل','جازان','نجران','الأحساء','ينبع'],
+'فلسطين':['القدس','رام الله','نابلس','الخليل','بيت لحم','جنين','طولكرم','قلقيلية','أريحا','غزة'],
+'الإمارات':['أبوظبي','دبي','الشارقة','عجمان','رأس الخيمة','الفجيرة','أم القيوين','العين'],
+'قطر':['الدوحة','الريان','الوكرة','الخور','الشمال'],
+'الكويت':['مدينة الكويت','حولي','السالمية','الفروانية','الجهراء','الأحمدي'],
+'البحرين':['المنامة','المحرق','الرفاع','مدينة حمد','مدينة عيسى'],
+'عُمان':['مسقط','صلالة','صحار','نزوى','صور','البريمي'],
+'مصر':['القاهرة','الإسكندرية','الجيزة','بورسعيد','السويس','المنصورة','طنطا','أسيوط','سوهاج','الأقصر','أسوان','شرم الشيخ'],
+'العراق':['بغداد','البصرة','الموصل','أربيل','النجف','كربلاء','كركوك','السليمانية','الناصرية'],
+'سوريا':['دمشق','حلب','حمص','حماة','اللاذقية','طرطوس','درعا','دير الزور'],
+'لبنان':['بيروت','طرابلس','صيدا','صور','زحلة','بعلبك'],
+'اليمن':['صنعاء','عدن','تعز','الحديدة','المكلا','إب'],
+'المغرب':['الرباط','الدار البيضاء','مراكش','فاس','طنجة','أكادير','مكناس','وجدة'],
+'الجزائر':['الجزائر','وهران','قسنطينة','عنابة','سطيف','باتنة','تلمسان'],
+'تونس':['تونس','صفاقس','سوسة','القيروان','بنزرت','قابس'],
+'ليبيا':['طرابلس','بنغازي','مصراتة','سبها','البيضاء'],
+'السودان':['الخرطوم','أم درمان','بورتسودان','كسلا','مدني'],
+'تركيا':['إسطنبول','أنقرة','إزمير','بورصة','أنطاليا','قونية','غازي عنتاب'],
+'ماليزيا':['كوالالمبور','بوتراجايا','شاه علم','جوهور باهرو','بينانغ'],
+'إندونيسيا':['جاكرتا','سورابايا','باندونغ','ميدان','ماكاسار'],
+'باكستان':['إسلام آباد','كراتشي','لاهور','بيشاور','روالبندي'],
+'المملكة المتحدة':['لندن','برمنغهام','مانشستر','ليفربول','ليدز','غلاسكو'],
+'الولايات المتحدة':['نيويورك','لوس أنجلوس','شيكاغو','هيوستن','دالاس','واشنطن','سان فرانسيسكو','ديترويت']
+};
+function fillPrayerCities(country,selected=''){const city=$('#ptCity');city.innerHTML='<option value="">اختر المدينة</option>'+((prayerPlaces[country]||[]).map(x=>'<option value="'+x+'">'+x+'</option>').join(''));city.disabled=!country;if(selected&&[...city.options].some(o=>o.value===selected))city.value=selected}
+if($('#ptCountry')){const country=$('#ptCountry');country.innerHTML='<option value="">اختر الدولة</option>'+Object.keys(prayerPlaces).map(x=>'<option value="'+x+'">'+x+'</option>').join('');country.onchange=()=>fillPrayerCities(country.value);try{const p=JSON.parse(localStorage.getItem('khatm-prayer-city')||'null');if(p&&prayerPlaces[p.country]){country.value=p.country;fillPrayerCities(p.country,p.city);$('#ptMethod').value=p.method||'4'}}catch(e){}}
