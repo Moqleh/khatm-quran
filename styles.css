@@ -178,3 +178,6 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
 /* v50 — trust, help and permission pages */
 .permission-guide{max-width:650px;margin:18px auto 12px;padding:18px;border:1px solid rgba(221,182,90,.22);border-radius:18px;background:rgba(221,182,90,.05);display:grid;gap:8px;text-align:start}.permission-guide b{color:var(--app-gold)}.permission-guide span{color:var(--app-cream);line-height:1.6}.permission-guide small{color:var(--muted);line-height:1.7}
 .faq-list{max-width:700px;margin:auto;display:grid;gap:10px}.faq-list details{border:1px solid rgba(247,240,223,.10);border-radius:18px;background:#0a332c;overflow:hidden}.faq-list summary{min-height:62px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;font-weight:800;color:var(--app-cream);list-style:none}.faq-list summary::-webkit-details-marker{display:none}.faq-list summary:after{content:"+";color:var(--app-gold);font-size:24px}.faq-list details[open] summary:after{content:"−"}.faq-list p{margin:0;padding:0 18px 18px;color:var(--muted);line-height:1.9}
+
+/* v51 audit polish */
+#prayerReminderState{line-height:1.5}.global-install-pulse:focus-visible,.primary:focus-visible,.outline:focus-visible,select:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid rgba(221,182,90,.45);outline-offset:3px}
