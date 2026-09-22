@@ -431,3 +431,19 @@ renderPrayerDashboardV51=function(t,label,dateData,timeZone){
 const _loadPrayerCoords75=loadPrayerCoords;
 loadPrayerCoords=async function(lat,lon,label){const method=$('#ptMethod').value,P=p75();$('#ptLocationTitle').textContent=UI72[state.lang]?.loadingPrayer||tr74('جاري تحميل المواقيت…');try{const r=await fetch('https://api.aladhan.com/v1/timings/'+Math.floor(Date.now()/1000)+'?latitude='+encodeURIComponent(lat)+'&longitude='+encodeURIComponent(lon)+'&method='+encodeURIComponent(method)),j=await r.json();if(!r.ok||!j.data)throw 0;renderPrayerDashboardV51(j.data.timings,label||P.current,j.data.date,j.data.meta?.timezone)}catch(e){showCachedPrayers(tr74('تعذر تحميل المواقيت من موقعك الآن.'))}};
 showCachedPrayers=function(note){try{const c=JSON.parse(localStorage.getItem('khatm-last-prayers')||'null');if(c?.t){renderPrayerDashboardV51(c.t,c.label,c.dateData,c.timeZone);$('#ptLocationTitle').textContent=(c.label||p75().saved)+' • '+p75().last;return}}catch(e){}$('#ptLocationTitle').textContent=tr74('تعذر تحميل المواقيت الآن.')};
+
+
+// v76 — language changes must re-render cached prayer dashboard.
+// The dashboard may already be open when the user switches language.
+function rerenderPrayer76(){
+ try{
+  const c=lastPrayerSchedule||JSON.parse(localStorage.getItem('khatm-last-prayers')||'null');
+  if(c?.t)renderPrayerDashboardV51(c.t,c.label,c.dateData,c.timeZone);
+ }catch(e){console.error('prayer language rerender',e)}
+}
+const _applyLanguage76=applyLanguageV63;
+applyLanguageV63=function(){_applyLanguage76();rerenderPrayer76()};
+document.addEventListener('click',function(e){
+ const b=e.target.closest('[data-set-lang]');if(!b)return;
+ setTimeout(rerenderPrayer76,0);
+},true);
