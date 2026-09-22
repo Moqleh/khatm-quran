@@ -31,7 +31,7 @@ function bindPageJumps(){$('[data-jump-page]').forEach(b=>b.onclick=()=>{state.r
 $$('.tabs button').forEach(b=>b.onclick=()=>renderIndex(b.dataset.index));
 $('#quranSearchBtn').onclick=()=>{renderIndex('surahs');$('#quranSearch').dispatchEvent(new Event('input'));$('#quranSearch').focus()};
 $$('[data-open-index]').forEach(b=>b.onclick=()=>{const type=b.dataset.openIndex;if(type==='pages'){openPage('discover');renderIndex(type)}});
-$$('[data-reader-mode]').forEach(b=>b.onclick=()=>{$$('[data-reader-mode]').forEach(x=>x.classList.toggle('selected',x===b));state.readerMode=b.dataset.readerMode;save();$('.readerPlaceholder small').textContent=b.dataset.readerMode==='mushaf'?'وضع صفحات المصحف جاهز لبيانات الصفحات الموثقة.':'وضع الآيات جاهز للنص والترجمة وأدوات الآية.'});
+$('[data-reader-mode]').forEach(b=>b.onclick=()=>{$('[data-reader-mode]').forEach(x=>x.classList.toggle('selected',x===b));state.readerMode=b.dataset.readerMode;save()});
 $('#readerBookmarks').onclick=()=>openPage('bookmarks');
 if($('#audioPlay'))$('#audioPlay').onclick=()=>showInfo('التلاوة','المشغل غير منشور حتى اعتماد مصدر تلاوات موثق.');
 $$('[data-audio]').forEach(b=>b.onclick=()=>showInfo('التلاوة','تم اختيار نمط التلاوة. يحتاج التشغيل الفعلي إلى مصدر صوت موثق قبل نشره.'));
