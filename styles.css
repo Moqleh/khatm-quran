@@ -291,3 +291,6 @@ header{background:var(--app-bg)!important;border:0!important;box-shadow:none!imp
 
 /* v73 — reader zoom must be controlled by JS; do not override the inline zoom width. */
 #quran .mushaf-viewport img{max-width:none!important}
+
+/* v81 — keep the Kaaba marker exactly centered in the Qibla dial. Earlier rules applied both transform and the individual translate property, shifting the marker twice. */
+#qiblaPage .qibla-dial .kaaba-mark{left:50%!important;top:50%!important;translate:none!important;transform:translate(-50%,-50%)!important}
