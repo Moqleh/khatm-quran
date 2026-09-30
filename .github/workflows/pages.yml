@@ -18,9 +18,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Verify SEO source files
+        run: |
+          set -euo pipefail
+          test -s sitemap.xml
+          test -s robots.txt
+          grep -Fq '<urlset' sitemap.xml
+          grep -Fq 'Sitemap: https://moqleh.github.io/khatm-quran/sitemap.xml' robots.txt
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify public SEO endpoints
+        env:
+          SITE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 5 "${SITE_URL%/}/sitemap.xml" | grep -Fq '<urlset'
+          curl --fail --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 5 "${SITE_URL%/}/robots.txt" | grep -Fq 'Sitemap: https://moqleh.github.io/khatm-quran/sitemap.xml'
